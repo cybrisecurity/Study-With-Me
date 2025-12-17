@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Countdown Timer</title>
+<style>
+    body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+    }
+
+    h1 {
+        font-size: 48px;
+        color: #0d5722;
+        margin-bottom: 30px;
+    }
+
+    #timer {
+        font-size: 48px;
+        font-weight: bold;
+        background: #fff;
+        padding: 20px 40px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+
+    .buttons button {
+        padding: 10px 20px;
+        margin: 0 10px;
+        font-size: 18px;
+        border: none;
+        border-radius: 6px;
+        background-color: #0d5722;
+        color: #fff;
+        cursor: pointer;
+    }
+
+    .buttons button:hover {
+        background-color: #1a7f37;
+    }
+
+    input[type="number"] {
+        width: 70px;
+        padding: 6px;
+        font-size: 16px;
+        margin-right: 10px;
+    }
+</style>
+</head>
+<body>
+
+<h1>Countdown Timer</h1>
+
+<div>
+    <input type="number" id="hoursInput" placeholder="HH" min="0">
+    <input type="number" id="minutesInput" placeholder="MM" min="0" max="59">
+    <input type="number" id="secondsInput" placeholder="SS" min="0" max="59">
+    <button id="setTimer">Set Timer</button>
+</div>
+
+<div id="timer">00:00:00:000</div>
+
+<div class="buttons">
+    <button id="start">Start</button>
+    <button id="pause">Pause</button>
+    <button id="reset">Reset</button>
+</div>
+
+<script>
+let totalTime = 0; // 
+let remainingTime = 0;
+let timerInterval = null;
+
+const timerDisplay = document.getElementById("timer");
+
+function updateDisplay(ms) {
+    if(ms < 0) ms = 0;
+    let hours = Math.floor(ms / 3600000);
+    let minutes = Math.floor((ms % 3600000) / 60000);
+    let seconds = Math.floor((ms % 60000) / 1000);
+    let milliseconds = ms % 1000;
+
+    timerDisplay.textContent =
+        `${hours.toString().padStart(2,'0')}:` +
+        `${minutes.toString().padStart(2,'0')}:` +
+        `${seconds.toString().padStart(2,'0')}:` +
+        `${milliseconds.toString().padStart(3,'0')}`;
+}
+
+function startTimer() {
+    if(timerInterval || remainingTime <= 0) return;
+    const startTime = Date.now();
+    timerInterval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const timeLeft = remainingTime - elapsed;
+        updateDisplay(timeLeft);
+
+        if(timeLeft <= 0){
+            clearInterval(timerInterval);
+            timerInterval = null;
+            alert("Time's up!");
+        }
+    }, 10);
+}
+
+function pauseTimer() {
+    if(timerInterval){
+        clearInterval(timerInterval);
+        timerInterval = null;
+        const displayed = timerDisplay.textContent.split(':');
+        remainingTime = 
+            parseInt(displayed[0])*3600000 +
+            parseInt(displayed[1])*60000 +
+            parseInt(displayed[2])*1000 +
+            parseInt(displayed[3]);
+    }
+}
+
+function resetTimer() {
+    pauseTimer();
+    remainingTime = totalTime;
+    updateDisplay(remainingTime);
+}
+
+document.getElementById("start").addEventListener("click", startTimer);
+document.getElementById("pause").addEventListener("click", pauseTimer);
+document.getElementById("reset").addEventListener("click", resetTimer);
+
+document.getElementById("setTimer").addEventListener("click", () => {
+    const h = parseInt(document.getElementById("hoursInput").value) || 0;
+    const m = parseInt(document.getElementById("minutesInput").value) || 0;
+    const s = parseInt(document.getElementById("secondsInput").value) || 0;
+    totalTime = (h*3600 + m*60 + s)*1000;
+    remainingTime = totalTime;
+    updateDisplay(remainingTime);
+});
+</script>
+
+</body>
+</html>
